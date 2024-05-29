@@ -1,6 +1,6 @@
 [project]
 name = "btools"
-version = "0.1.0"
+version = ""{new_version}""
 description = "Add your description here"
 authors = [
     { name = "Bosco Ho", email = "apposite@gmail.com" }
