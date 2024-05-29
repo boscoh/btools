@@ -24,10 +24,6 @@ def main():
         print("Couldn't find pyproject.toml")
         sys.exit()
 
-    run_as_shell("""
-    git stash
-    """)
-
     action = None
     if len(sys.argv) > 1:
         action = sys.argv[1].lower()
@@ -57,7 +53,6 @@ def main():
     run_as_shell(f"""
     git commit -am "version bump {new_version}"
     git push
-    git stash pop
     """)
 
 if __name__ == "__main__":
