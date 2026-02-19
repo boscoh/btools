@@ -1,38 +1,39 @@
 #!/usr/bin/env python3
 
+"""Plot parquet files"""
+
 import os
+import platform
+import subprocess
 from pathlib import Path
 
-import pandas
-from pandas.plotting import register_matplotlib_converters
-
-from matplotlib import pyplot as plt
 import matplotlib as mpl
-
-import subprocess
-import platform
+import pandas
+from cyclopts import App
+from matplotlib import pyplot as plt
+from pandas.plotting import register_matplotlib_converters
 
 register_matplotlib_converters()
 
-__doc__ = """Plot parquet files"""
+app = App()
 
 
 def open_file(filepath):
-    if platform.system() == 'Darwin':  # macOS
-        subprocess.call(('open', filepath))
-    elif platform.system() == 'Windows':  # Windows
+    if platform.system() == "Darwin":  # macOS
+        subprocess.call(("open", filepath))
+    elif platform.system() == "Windows":  # Windows
         os.startfile(filepath)
     else:  # linux variants
-        subprocess.call(('xdg-open', filepath))
+        subprocess.call(("xdg-open", filepath))
 
 
 def plot_df_columns_as_scatter(df):
-    mpl.rcParams['xtick.labelsize'] = 6
-    mpl.rcParams['ytick.labelsize'] = 6
+    mpl.rcParams["xtick.labelsize"] = 6
+    mpl.rcParams["ytick.labelsize"] = 6
 
     xlim = [df["time"].min(), df["time"].max()]
     cols = [c for c in df.columns.values if c != "time"]
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     fig, axes = plt.subplots(len(cols), 1, sharex=True, figsize=(7, len(cols) * 1))
     for i, col in enumerate(cols):
         ax = axes[i]
@@ -45,7 +46,7 @@ def plot_df_columns_as_scatter(df):
             c=color,
         )
 
-        ax.set_title(col, color=color, fontdict={'fontsize': 10}, pad=0, loc="right")
+        ax.set_title(col, color=color, fontdict={"fontsize": 10}, pad=0, loc="right")
 
         # recolor the axes and axes decorators
         ax_color = (0.4, 0.4, 0.4)
@@ -61,11 +62,11 @@ def plot_df_columns_as_scatter(df):
         ax.spines["right"].set_color(grid_box_border_color)
         ax.spines["left"].set_color(grid_box_border_color)
 
-    plt.subplots_adjust(hspace=.4)
+    plt.subplots_adjust(hspace=0.4)
     plt.xlim(xlim)
 
 
-def resample_df(df, interval='1s'):
+def resample_df(df, interval="1s"):
     df = df.set_index("time")
     df.sort_index(inplace=True)
     df = df.resample(interval).mean()
@@ -74,27 +75,28 @@ def resample_df(df, interval='1s'):
     return df
 
 
+@app.default
 def main():
+    """Find and plot parquet files from data/results directory."""
     d = next(Path().glob("**/data/results"))
-    print(f'Found (**/data/results) directory: {d}')
+    print(f"Found (**/data/results) directory: {d}")
 
     n = len(list(d.glob("**/*parquet")))
-    print(f'Loading {n} parquet files...')
+    print(f"Loading {n} parquet files...")
 
     df = pandas.read_parquet(d)
 
     if isinstance(df.index, pandas.DatetimeIndex):
-        df = resample_df(df, '1s')
+        df = resample_df(df, "1s")
 
-    out_f = 'data_logger_results.png'
-    print(f'Saving {out_f}')
-    mpl.use('Agg')
+    out_f = "data_logger_results.png"
+    print(f"Saving {out_f}")
+    mpl.use("Agg")
     plot_df_columns_as_scatter(df)
     plt.savefig(out_f)
 
     open_file(out_f)
 
 
-
 if __name__ == "__main__":
-    main()
+    app()

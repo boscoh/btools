@@ -1,22 +1,24 @@
 [project]
 name = "btools"
-version = "0.1.10"
+version = "0.1.0"
 description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
 authors = [
     { name = "Bosco Ho", email = "apposite@gmail.com" }
 ]
 dependencies = [
-    "path>=16.14.0",
-    "semver>=3.0.2",
-    "numpy>=1.26.4",
-    "click>=8.1.7",
-    "ruyaml>=0.91.0",
-    "pandas>=2.2.2",
-    "matplotlib>=3.9.0",
-    "pydash>=8.0.3",
+    "path",
+    "semver",
+    "numpy >1.24.4",
+    "click",
+    "ruyaml",
+    "pandas",
+    "matplotlib",
+    "pydash",
+    "ruff>=0.11.10",
+    "cyclopts>=4.5.3",
 ]
-readme = "README.md"
-requires-python = ">= 3.8"
 
 [project.scripts]
 bumpver = "btools.bumpver:main"
@@ -28,17 +30,4 @@ psword = "btools.psword:main"
 rm_npm = "btools.rm_npm:main"
 text2 = "btools.text2:main"
 todict = "btools.todict:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.rye]
-managed = true
-dev-dependencies = []
-
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/btools"]
+uvpub = "btools.publish:main"

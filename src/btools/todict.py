@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
+"""Convert json to python dict repr"""
+
 import io
 import sys
 import textwrap
 import typing
 from json import load as json_load
 
-import click
+from cyclopts import App
 from ruyaml import YAML
 
-__doc__ = "Convert json to python dict repr"
+app = App()
 
 indent = "  "
 
@@ -82,16 +84,15 @@ d = {
 }
 
 
-@click.command()
-@click.option(
-    "--json",
-    help="incoming json",
-)
-@click.option(
-    "--yaml",
-    help="incoming yaml",
-)
-def run(json, yaml):
+@app.default
+def run(json: str = None, yaml: str = None):
+    """Convert JSON or YAML to Python dict format.
+
+    Reads from stdin if no file is specified.
+
+    :param json: Path to incoming JSON file
+    :param yaml: Path to incoming YAML file
+    """
     if json:
         with open(json) as f:
             incoming_json = json_load(f)
@@ -107,8 +108,8 @@ def run(json, yaml):
             textwrap.dedent(
                 """
                 to_dict converts json to python dict format
-                
-                usage: 
+
+                usage:
                    to_dict --json my.json
                    to_dict --yaml my.yaml
                    cat <json file> | to_dict
@@ -125,4 +126,4 @@ def run(json, yaml):
 
 
 if __name__ == "__main__":
-    run()
+    app()

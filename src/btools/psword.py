@@ -1,61 +1,51 @@
 #!/usr/bin/env python3
 
+"""Find processes with name"""
+
 import subprocess
-import sys
+
+from cyclopts import App
+
+app = App()
+
 
 def run(cmd):
     try:
-        bytes = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-        text = bytes.decode("utf-8", errors="ignore")
+        bytes_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+        text = bytes_output.decode("utf-8", errors="ignore")
         return text
     except subprocess.CalledProcessError:
         return ""
 
 
+@app.default
+def main(*words: str, kill: bool = False):
+    """Find processes by name and optionally kill them.
 
-__doc__ = """
-Find processes with name
+    :param words: Process names to search for
+    :param kill: If True, kill matching processes
+    """
+    if not words:
+        print("Usage: psword [-k] <word>")
+        return
 
-Usage: psword [-k] <word>
-
-Print simple parquet files as images
-
-Options:
--k   kill jobs
-"""
-
-
-def main():
-    args = sys.argv[1:]
-
-    is_kill = '-k' in args
-    if is_kill:
-        args.remove('-k')
-
-    if not len(args):
-        print(__doc__)
-        sys.exit(1)
-
-
-    for word in args:
+    for word in words:
         txt = run(f"ps aux | grep {word}")
         for line in txt.splitlines():
             tokens = line.split()
-            id = tokens[1]
+            i_process = tokens[1]
             cmd = " ".join(tokens[10:])
             if len(cmd) > 80:
                 cmd = cmd[:80] + "..."
-            if 'psword' in line:
+            if "psword" in line:
                 continue
-            if is_kill:
-                kill_cmd = f"kill -9 {id}"
+            if kill:
+                kill_cmd = f"kill -9 {i_process}"
                 print(f"cmd: {kill_cmd} ({cmd})")
                 run(kill_cmd)
             else:
-                print(f"process {id}: {cmd}")
-
-
+                print(f"process {i_process}: {cmd}")
 
 
 if __name__ == "__main__":
-    main()
+    app()

@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-import os
-import pathlib
 
-__doc__ = "Reclaim for user any files that are not shell scripts"
+"""Reclaim for user any files that are not shell scripts"""
+
+import os
+from pathlib import Path
+
+from cyclopts import App
+
+app = App()
 
 skip_directories = ["__pycache__", "node_modules", ".git"]
 
@@ -13,21 +18,24 @@ def run(cmd):
 
 
 def process(d):
-    for f in pathlib.Path(d).glob("*"):
+    for f in Path(d).glob("*"):
         if f.is_dir():
             if f.name in skip_directories:
                 continue
+            if f.name.startswith("."):
+                continue
             run(f'chmod og-w "{f}"')
-            process(f)
         else:
             if not str(f).endswith("sh") and not str(f).endswith("bat"):
                 run(f'chmod a-x "{f}"')
             run(f'chmod og-w "{f}"')
 
 
+@app.default
 def main():
+    """Remove execute permissions from non-script files and write permissions from group/other."""
     process(".")
 
 
 if __name__ == "__main__":
-    main()
+    app()

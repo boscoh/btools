@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-import sys
-import semver
-from path import Path
-import os
 
-__doc__ = "Bumpver of pyproject.toml. Usage: bump_ver (major|minor|patch)"
+"""Bumpver of pyproject.toml."""
+
+import os
+import sys
+from pathlib import Path
+
+import semver
+from cyclopts import App
+
+app = App()
 
 
 def run_as_shell(txt):
@@ -14,46 +19,64 @@ def run_as_shell(txt):
         print(f">> {line}")
         os.system(line)
 
-def main():
-    print(__doc__)
-    curr_dir = Path().getcwd()
+
+@app.default
+def main(action: str = None):
+    """Bump version in pyproject.toml and commit changes.
+
+    :param action: Version component to bump (major, minor, or patch). If not specified, shows current version.
+    """
+    curr_dir = Path.cwd()
     pyproject_toml = curr_dir / "pyproject.toml"
-    print(f"Looking for {pyproject_toml}")
 
     if not pyproject_toml.exists():
         print("Couldn't find pyproject.toml")
         sys.exit()
 
-    action = None
-    if len(sys.argv) > 1:
-        action = sys.argv[1].lower()
-
-    new_version = None
-    out_lines = []
-    lines = pyproject_toml.lines()
+    lines = pyproject_toml.read_text().splitlines()
+    version_str = None
     for line in lines:
         if "version" in line:
             version_str = eval(line.split("=")[-1])
-            print("Current version:", version_str)
-            version = semver.Version.parse(str(version_str))
-            if action == "major":
-                new_version = version.bump_major()
-            elif action == "minor":
-                new_version = version.bump_minor()
-            elif action == "patch":
-                new_version = version.bump_patch()
-            if new_version:
-                line = line.replace(version_str, str(new_version))
-                print("Bumped version:", new_version)
+            break
+
+    if not version_str:
+        print("Couldn't find version in pyproject.toml")
+        sys.exit()
+
+    print("Current version:", version_str)
+
+    if not action:
+        return
+
+    action = action.lower()
+    version = semver.Version.parse(str(version_str))
+
+    if action == "major":
+        new_version = version.bump_major()
+    elif action == "minor":
+        new_version = version.bump_minor()
+    elif action == "patch":
+        new_version = version.bump_patch()
+    else:
+        print(f"Unknown action: {action}")
+        sys.exit()
+
+    print("Bumped version:", new_version)
+
+    out_lines = []
+    for line in pyproject_toml.read_text().splitlines():
+        if "version" in line:
+            line = line.replace(version_str, str(new_version))
         out_lines.append(line)
 
-    if new_version:
-        pyproject_toml.write_lines(out_lines)
+    pyproject_toml.write_text("\n".join(out_lines) + "\n")
 
     run_as_shell(f"""
     git commit -am "version bump {new_version}"
     git push
     """)
 
+
 if __name__ == "__main__":
-    main()
+    app()
