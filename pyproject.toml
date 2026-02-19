@@ -31,3 +31,6 @@ rm_npm = "btools.rm_npm:main"
 text2 = "btools.text2:main"
 todict = "btools.todict:main"
 uvpub = "btools.publish:main"
+
+[tool.uv]
+package = true
