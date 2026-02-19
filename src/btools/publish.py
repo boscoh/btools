@@ -37,6 +37,7 @@ def main(part: Literal["major", "minor", "patch"] = None):
     print(f"Current version: {current_version}")
 
     if not part:
+        print("\nUsage: publish [major|minor|patch]")
         return
 
     major, minor, patch = int(match.group(1)), int(match.group(2)), int(match.group(3))

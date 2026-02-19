@@ -47,6 +47,7 @@ def main(action: str = None):
     print("Current version:", version_str)
 
     if not action:
+        print("\nUsage: bumpver [major|minor|patch]")
         return
 
     action = action.lower()
