@@ -20,10 +20,10 @@ def run(cmd: str) -> None:
 
 
 @app.default
-def main(part: Literal["major", "minor", "patch"] = None):
+def main(part: Literal["major", "minor", "patch"]):
     """Bump version, commit, push, and publish package to PyPI.
 
-    :param part: Version component to bump (major, minor, or patch). If not specified, shows current version.
+    :param part: Version component to bump (major, minor, or patch)
     """
     pyproject = Path("pyproject.toml")
     text = pyproject.read_text()
@@ -35,10 +35,6 @@ def main(part: Literal["major", "minor", "patch"] = None):
 
     current_version = match.group(1) + "." + match.group(2) + "." + match.group(3)
     print(f"Current version: {current_version}")
-
-    if not part:
-        print("\nUsage: publish [major|minor|patch]")
-        return
 
     major, minor, patch = int(match.group(1)), int(match.group(2)), int(match.group(3))
 

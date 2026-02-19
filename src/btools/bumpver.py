@@ -21,10 +21,10 @@ def run_as_shell(txt):
 
 
 @app.default
-def main(action: str = None):
+def main(action: str):
     """Bump version in pyproject.toml and commit changes.
 
-    :param action: Version component to bump (major, minor, or patch). If not specified, shows current version.
+    :param action: Version component to bump (major, minor, or patch)
     """
     curr_dir = Path.cwd()
     pyproject_toml = curr_dir / "pyproject.toml"
@@ -45,10 +45,6 @@ def main(action: str = None):
         sys.exit()
 
     print("Current version:", version_str)
-
-    if not action:
-        print("\nUsage: bumpver [major|minor|patch]")
-        return
 
     action = action.lower()
     version = semver.Version.parse(str(version_str))
