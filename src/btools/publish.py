@@ -10,7 +10,7 @@ from typing import Literal
 
 from cyclopts import App
 
-app = App()
+app = App(help_flags=["--help", "-h"])
 
 
 def run(cmd: str) -> None:
@@ -20,11 +20,15 @@ def run(cmd: str) -> None:
 
 
 @app.default
-def main(part: Literal["major", "minor", "patch"]):
+def main(part: Literal["major", "minor", "patch"] = None):
     """Bump version, commit, push, and publish package to PyPI.
 
     :param part: Version component to bump (major, minor, or patch)
     """
+    if part is None:
+        print("Usage: uvpub [major|minor|patch]")
+        print("\nBump version, commit, push, and publish package to PyPI.")
+        sys.exit(0)
     pyproject = Path("pyproject.toml")
     text = pyproject.read_text()
 

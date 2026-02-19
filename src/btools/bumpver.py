@@ -9,7 +9,7 @@ from pathlib import Path
 import semver
 from cyclopts import App
 
-app = App()
+app = App(help_flags=["--help", "-h"])
 
 
 def run_as_shell(txt):
@@ -21,11 +21,15 @@ def run_as_shell(txt):
 
 
 @app.default
-def main(action: str):
+def main(action: str = None):
     """Bump version in pyproject.toml and commit changes.
 
     :param action: Version component to bump (major, minor, or patch)
     """
+    if action is None:
+        print("Usage: bumpver [major|minor|patch]")
+        print("\nBump version in pyproject.toml and commit changes.")
+        sys.exit(0)
     curr_dir = Path.cwd()
     pyproject_toml = curr_dir / "pyproject.toml"
 
