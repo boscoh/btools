@@ -2,20 +2,11 @@
 
 """Find processes with name"""
 
-import subprocess
-
 from cyclopts import App
 
+from btools.utils import run_output
+
 app = App()
-
-
-def run(cmd):
-    try:
-        bytes_output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-        text = bytes_output.decode("utf-8", errors="ignore")
-        return text
-    except subprocess.CalledProcessError:
-        return ""
 
 
 @app.default
@@ -26,11 +17,11 @@ def main(*words: str, kill: bool = False):
     :param kill: If True, kill matching processes
     """
     if not words:
-        print("Usage: psword [-k] <word>")
+        app.help_print()
         return
 
     for word in words:
-        txt = run(f"ps aux | grep {word}")
+        txt = run_output(f"ps aux | grep {word}")
         for line in txt.splitlines():
             tokens = line.split()
             i_process = tokens[1]
@@ -42,7 +33,7 @@ def main(*words: str, kill: bool = False):
             if kill:
                 kill_cmd = f"kill -9 {i_process}"
                 print(f"cmd: {kill_cmd} ({cmd})")
-                run(kill_cmd)
+                run_output(kill_cmd)
             else:
                 print(f"process {i_process}: {cmd}")
 

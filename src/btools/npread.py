@@ -14,6 +14,10 @@ def main(*files: str):
 
     :param files: One or more .npy files to read
     """
+    if not files:
+        app.help_print()
+        return
+
     for arg in files:
         m = numpy.load(arg)
         print("Numpy shape", m.shape)

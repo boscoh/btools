@@ -1,82 +1,61 @@
 #!/usr/bin/env python3
 
-"""Bumpver of pyproject.toml."""
+"""Bump version in pyproject.toml, commit, push, and optionally publish to PyPI."""
 
-import os
+import re
 import sys
 from pathlib import Path
+from typing import Literal
 
-import semver
 from cyclopts import App
+
+from btools.utils import run
 
 app = App(help_flags=["--help", "-h"])
 
 
-def run_as_shell(txt):
-    for line in txt.splitlines():
-        if not line.strip():
-            continue
-        print(f">> {line}")
-        os.system(line)
-
-
 @app.default
-def main(action: str = None):
-    """Bump version in pyproject.toml and commit changes.
+def main(part: Literal["major", "minor", "patch"] = None, *, publish: bool = True):
+    """Bump version in pyproject.toml, commit, and push.
 
-    :param action: Version component to bump (major, minor, or patch)
+    :param part: Version component to bump (major, minor, or patch)
+    :param publish: Also build and publish to PyPI
     """
-    if action is None:
-        print("Usage: bumpver [major|minor|patch]")
-        print("\nBump version in pyproject.toml and commit changes.")
-        sys.exit(0)
-    curr_dir = Path.cwd()
-    pyproject_toml = curr_dir / "pyproject.toml"
+    if part is None:
+        app.help_print()
+        return
 
-    if not pyproject_toml.exists():
-        print("Couldn't find pyproject.toml")
-        sys.exit()
+    pyproject = Path("pyproject.toml")
+    if not pyproject.exists():
+        print("Could not find pyproject.toml")
+        sys.exit(1)
 
-    lines = pyproject_toml.read_text().splitlines()
-    version_str = None
-    for line in lines:
-        if "version" in line:
-            version_str = eval(line.split("=")[-1])
-            break
+    text = pyproject.read_text()
+    match = re.search(r'^version = "(\d+)\.(\d+)\.(\d+)"', text, re.MULTILINE)
+    if not match:
+        print("Could not find version in pyproject.toml")
+        sys.exit(1)
 
-    if not version_str:
-        print("Couldn't find version in pyproject.toml")
-        sys.exit()
+    major, minor, patch = int(match.group(1)), int(match.group(2)), int(match.group(3))
+    print(f"Current version: {major}.{minor}.{patch}")
 
-    print("Current version:", version_str)
-
-    action = action.lower()
-    version = semver.Version.parse(str(version_str))
-
-    if action == "major":
-        new_version = version.bump_major()
-    elif action == "minor":
-        new_version = version.bump_minor()
-    elif action == "patch":
-        new_version = version.bump_patch()
+    if part == "major":
+        major, minor, patch = major + 1, 0, 0
+    elif part == "minor":
+        minor, patch = minor + 1, 0
     else:
-        print(f"Unknown action: {action}")
-        sys.exit()
+        patch += 1
 
-    print("Bumped version:", new_version)
+    new_version = f"{major}.{minor}.{patch}"
+    pyproject.write_text(text.replace(match.group(0), f'version = "{new_version}"'))
+    print(f"Version bumped to {new_version}")
 
-    out_lines = []
-    for line in pyproject_toml.read_text().splitlines():
-        if "version" in line:
-            line = line.replace(version_str, str(new_version))
-        out_lines.append(line)
+    run(f'git commit -am "Bump version to {new_version}"')
+    run("git push")
 
-    pyproject_toml.write_text("\n".join(out_lines) + "\n")
-
-    run_as_shell(f"""
-    git commit -am "version bump {new_version}"
-    git push
-    """)
+    if publish:
+        run("uv build")
+        run(f"uv publish dist/*-{new_version}*")
 
 
 if __name__ == "__main__":

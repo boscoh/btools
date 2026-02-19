@@ -13,18 +13,6 @@ app = App()
 search_dirs = ["/Applications/", f"{Path.home()}/MyApps"]
 
 
-def get_name(f):
-    base = os.path.basename(f)
-    return base.replace(".app", "").lower()
-
-
-def find_match(apps, use_app):
-    for app in apps:
-        if use_app in app:
-            return app
-    return None
-
-
 @app.default
 def main(*params: str):
     """Open macOS applications by partial name match.
@@ -32,16 +20,14 @@ def main(*params: str):
     :param params: Application name followed by optional parameters to pass to the app
     """
     if not params:
-        print("Open OSX apps (searches for text fit to App name)")
-        print("Usage: a app_name param1 param2 ...")
+        app.help_print()
         return
 
     params = list(params)
     use_app = params[0].lower()
     for search_dir in search_dirs:
-        fnames = glob.glob(os.path.join(search_dir, "*"))
-        apps = [get_name(f) for f in fnames]
-        if match_app := find_match(apps, use_app):
+        names = [Path(f).stem.lower() for f in glob.glob(os.path.join(search_dir, "*"))]
+        if match_app := next((name for name in names if use_app in name), None):
             params[0] = match_app
             break
 

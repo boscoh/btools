@@ -2,27 +2,18 @@
 
 """cli convert between md|html|docx|pug"""
 
-import subprocess
 from pathlib import Path
 
 from cyclopts import App
 
+from btools.utils import run, run_output
+
 app = App()
-
-
-def run(cmd, env=None):
-    print(">>>>", cmd)
-    subprocess.run(cmd, shell=True, check=True, env=env)
-
-
-def run_with_output(cmd):
-    bytes_output = subprocess.check_output(cmd.split())
-    return bytes_output.decode("utf-8", errors="ignore")
 
 
 def convert_md_to_html(md, html):
     run(f"pandoc --from markdown --to html '{md}' -o '{html}'")
-    txt = run_with_output(f"beautify {html}")
+    txt = run_output(f"beautify {html}")
     open(html, "w").write(txt)
 
 
@@ -46,7 +37,7 @@ def convert_pug_to_html(pug, html):
     if temp_html.exists():
         temp_html.unlink()
     run(f"pug {temp_pug}  ")
-    txt = run_with_output(f"beautify {temp_html}")
+    txt = run_output(f"beautify {temp_html}")
     open(html, "w").write(txt)
 
 
