@@ -21,16 +21,16 @@ dependencies = [
 ]
 
 [project.scripts]
-bumpver = "btools.bumpver:main"
-a = "btools.a:main"
-clear_chmod = "btools.clear_chmod:main"
-npread = "btools.npread:main"
-dfplot = "btools.dfplot:main"
-psword = "btools.psword:main"
-rm_npm = "btools.rm_npm:main"
-text2 = "btools.text2:main"
-todict = "btools.todict:main"
-uvpub = "btools.publish:main"
+bumpver = "btools.bumpver:app"
+a = "btools.a:app"
+clear_chmod = "btools.clear_chmod:app"
+npread = "btools.npread:app"
+dfplot = "btools.dfplot:app"
+psword = "btools.psword:app"
+rm_npm = "btools.rm_npm:app"
+text2 = "btools.text2:app"
+todict = "btools.todict:app"
+uvpub = "btools.publish:app"
 
 [tool.uv]
 package = true
