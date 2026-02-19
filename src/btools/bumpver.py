@@ -16,7 +16,7 @@ app = App(help_flags=["--help", "-h"])
 
 @app.default
 def main(part: Literal["major", "minor", "patch"] = None, *, publish: bool = True):
-    """Bump version in pyproject.toml, commit, and push.
+    """Bump version in pyproject.toml, commit, push, and publish.
 
     :param part: Version component to bump (major, minor, or patch)
     :param publish: Also build and publish to PyPI
