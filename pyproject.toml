@@ -30,5 +30,8 @@ rm_npm = "btools.rm_npm:app"
 text2 = "btools.text2:app"
 todict = "btools.todict:app"
 
+[tool.setuptools.packages.find]
+include = ["btools*"]
+
 [tool.uv]
 package = true

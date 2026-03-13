@@ -10,5 +10,9 @@ wheels/
 .venv
 .idea
 .ruff_cache
+uv.lock
 
 requirements*
+
+node_modules
+package-lock.json
